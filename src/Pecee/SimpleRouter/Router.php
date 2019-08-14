@@ -5,6 +5,7 @@ namespace Pecee\SimpleRouter;
 use Pecee\Exceptions\InvalidArgumentException;
 use Pecee\Http\Exceptions\MalformedUrlException;
 use Pecee\Http\Middleware\BaseCsrfVerifier;
+use Pecee\Http\PostBody\PostBody;
 use Pecee\Http\Request;
 use Pecee\Http\Url;
 use Pecee\SimpleRouter\ClassLoader\ClassLoader;
@@ -65,7 +66,7 @@ class Router
      * @var BaseCsrfVerifier
      */
     protected $csrfVerifier;
-
+	
     /**
      * Get exception handlers
      * @var array
@@ -149,24 +150,44 @@ class Router
      * @param IRoute $route
      * @return IRoute
      */
-    public function addRoute(IRoute $route): IRoute
-    {
-        $this->fireEvents(EventHandler::EVENT_ADD_ROUTE, [
-            'route' => $route,
-        ]);
-
-        /*
-         * If a route is currently being processed, that means that the route being added are rendered from the parent
-         * routes callback, so we add them to the stack instead.
-         */
-        if ($this->isProcessingRoute === true) {
-            $this->routeStack[] = $route;
-        } else {
-            $this->routes[] = $route;
-        }
-
-        return $route;
-    }
+	public function addRoute(IRoute $route): IRoute
+	{
+		$this->fireEvents(EventHandler::EVENT_ADD_ROUTE, [
+			'route' => $route,
+		]);
+		
+		$route = $this->addPostBodyToParameters($route);
+		
+		if ($this->isProcessingRoute === true) {
+			$this->routeStack[] = $route;
+		} else {
+			$this->routes[] = $route;
+		}
+		
+		return $route;
+	}
+	
+	/**
+	 * @param IRoute $route
+	 *
+	 * @return IRoute
+	 */
+	private function addPostBodyToParameters(IRoute $route): IRoute
+	{
+		if(is_null($route->getPostBodyType()))
+			return $route;
+		
+		if(sizeof($this->request->getInputHandler()->all()) == 0)
+			return $route;
+		
+		$postBody = $this->request->getInputHandler()->all();
+		$postBody = PostBody::convertArrayToType($postBody, $route->getPostBodyType());
+		
+		$parameters = array_merge($route->getParameters(), $postBody);
+		$route = $route->setParameters($parameters);
+		
+		return $route;
+	}
 
     /**
      * Render and process any new routes added.

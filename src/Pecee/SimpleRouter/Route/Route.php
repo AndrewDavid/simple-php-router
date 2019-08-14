@@ -50,6 +50,7 @@ abstract class Route implements IRoute
     protected $parent;
     protected $callback;
     protected $defaultNamespace;
+    protected $postBodyType = null;
 
     /* Default options */
     protected $namespace;
@@ -576,5 +577,15 @@ abstract class Route implements IRoute
     {
         return $this->defaultParameterRegex;
     }
-
+	
+    public function setPostBodyType(string $type): IRoute
+    {
+    	$this->postBodyType = $type;
+    	return $this;
+    }
+	
+	public function getPostBodyType(): string
+	{
+		return $this->postBodyType;
+	}
 }

@@ -175,6 +175,21 @@ interface IRoute
      * @return static
      */
     public function setSettings(array $settings, bool $merge = false): self;
+	
+	/**
+	 * Set the class type to convert the post body to before passing it as a method parameter.
+	 *
+	 * @param string $type
+	 * @return static
+	 */
+	public function setPostBodyType(string $type): self;
+	
+	/**
+	 * Get the class type to convert the post body to before passing it as a method parameter.
+	 *
+	 * @return static
+	 */
+	public function getPostBodyType(): string;
 
     /**
      * Export route settings to array so they can be merged with another route.
