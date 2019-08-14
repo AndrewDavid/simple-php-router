@@ -14,12 +14,11 @@
 					$convertedBody->{$key} = $value;
 			}
 			
-			return self::castTypeProperties($convertedBody);
+			return self::castTypeProperties($convertedBody, $type);
 		}
 		
-		public static function castTypeProperties($postBodyObject)
+		public static function castTypeProperties($postBodyObject, $type)
 		{
-			$type = gettype($postBodyObject);
 			$typeModel = new $type;
 			
 			// CAST POST BODY OBJECT PROPERTIES TO EXPECTED PROPERTY TYPES
