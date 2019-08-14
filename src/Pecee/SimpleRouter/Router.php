@@ -156,35 +156,11 @@ class Router
 			'route' => $route,
 		]);
 		
-		$route = $this->addPostBodyToParameters($route);
-		
 		if ($this->isProcessingRoute === true) {
 			$this->routeStack[] = $route;
 		} else {
 			$this->routes[] = $route;
 		}
-		
-		return $route;
-	}
-	
-	/**
-	 * @param IRoute $route
-	 *
-	 * @return IRoute
-	 */
-	private function addPostBodyToParameters(IRoute $route): IRoute
-	{
-		if(empty($route->getPostBodyType()))
-			return $route;
-		
-		if(sizeof($this->request->getInputHandler()->all()) == 0)
-			return $route;
-		
-		$postBody = $this->request->getInputHandler()->all();
-		$postBody = PostBody::convertArrayToType($postBody, $route->getPostBodyType());
-		
-		$parameters = array_merge($route->getParameters(), $postBody);
-		$route = $route->setParameters($parameters);
 		
 		return $route;
 	}
@@ -401,6 +377,7 @@ class Router
                     ]);
 
                     $route->loadMiddleware($this->request, $this);
+                    $route->addPostBodyToParameters($this->request);
 
                     $output = $this->handleRouteRewrite($key, $url);
                     if ($output !== null) {

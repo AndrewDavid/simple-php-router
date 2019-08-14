@@ -25,6 +25,14 @@ interface ILoadableRoute extends IRoute
      * @param Router $router
      */
     public function loadMiddleware(Request $request, Router $router): void;
+	
+	/**
+	 * Assigned the post body as a parameter of type $postBodyType
+	 *
+	 * @param Request $request
+	 * @return ILoadableRoute
+	 */
+    public function addPostBodyToParameters(Request $request): self;
 
     /**
      * Get url

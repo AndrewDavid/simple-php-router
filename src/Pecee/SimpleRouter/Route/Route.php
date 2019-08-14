@@ -424,6 +424,10 @@ abstract class Route implements IRoute
         if (isset($values['middleware']) === true) {
             $this->setMiddlewares(array_merge((array)$values['middleware'], $this->middlewares));
         }
+        
+	    if (isset($values['postbodytype']) === true) {
+		    $this->setPostBodyType($values['postbodytype']);
+	    }
 
         if (isset($values['defaultParameterRegex']) === true) {
             $this->setDefaultParameterRegex($values['defaultParameterRegex']);
@@ -581,6 +585,7 @@ abstract class Route implements IRoute
     public function setPostBodyType(string $type): IRoute
     {
     	$this->postBodyType = $type;
+    	
     	return $this;
     }
 	

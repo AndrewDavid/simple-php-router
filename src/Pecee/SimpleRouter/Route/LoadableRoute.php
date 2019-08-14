@@ -3,6 +3,7 @@
 namespace Pecee\SimpleRouter\Route;
 
 use Pecee\Http\Middleware\IMiddleware;
+use Pecee\Http\PostBody\PostBody;
 use Pecee\Http\Request;
 use Pecee\SimpleRouter\Exceptions\HttpException;
 use Pecee\SimpleRouter\Router;
@@ -51,6 +52,20 @@ abstract class LoadableRoute extends Route implements ILoadableRoute
 
         $router->debug('Finished loading middlewares');
     }
+    
+	public function addPostBodyToParameters(Request $request): ILoadableRoute
+	{
+		if(empty($this->postBodyType))
+			return $this;
+		
+		if(sizeof($request->getInputHandler()->all()) == 0)
+			return $this;
+		
+		$postBody = PostBody::convertArrayToType($request->getInputHandler()->all(), $this->postBodyType);
+		$this->setParameters(array_merge($this->parameters, [$this->postBodyType=>$postBody]));
+		
+		return $this;
+	}
 
     public function matchRegex(Request $request, $url): ?bool
     {
