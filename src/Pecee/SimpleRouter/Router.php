@@ -174,7 +174,7 @@ class Router
 	 */
 	private function addPostBodyToParameters(IRoute $route): IRoute
 	{
-		if(is_null($route->getPostBodyType()))
+		if(empty($route->getPostBodyType()))
 			return $route;
 		
 		if(sizeof($this->request->getInputHandler()->all()) == 0)

@@ -50,7 +50,7 @@ abstract class Route implements IRoute
     protected $parent;
     protected $callback;
     protected $defaultNamespace;
-    protected $postBodyType = null;
+    protected $postBodyType = '';
 
     /* Default options */
     protected $namespace;
