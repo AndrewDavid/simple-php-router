@@ -62,7 +62,7 @@ abstract class LoadableRoute extends Route implements ILoadableRoute
 			return $this;
 		
 		$postBody = PostBody::convertArrayToType($request->getInputHandler()->all(), $this->postBodyType);
-		$this->setParameters(array_merge($this->parameters, [$this->postBodyType=>$postBody]));
+		$this->setParameters(array_merge([$this->postBodyType=>$postBody], $this->parameters));
 		
 		return $this;
 	}
