@@ -30,7 +30,20 @@
 				if(property_exists($typeModel, $property) === false)
 					continue;
 				
-				settype($value, gettype($typeModel->$property));
+				if(is_object($typeModel->$property))
+				{
+					if(is_array($value))
+					{
+						$value = self::convertArrayToType($value, gettype($typeModel->$property));
+					}
+					
+					$value = self::castTypeProperties($value, gettype($typeModel->$property));
+				}
+				else
+				{
+					settype($value, gettype($typeModel->$property));
+				}
+				
 				$typeModel->{$property} = $value;
 			}
 			
