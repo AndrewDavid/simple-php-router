@@ -572,7 +572,8 @@ class VideoController
 		// $query->order == 'asc'
 		// $query->page == 1
 	}
-}```
+}
+```
 
 
 ## Named routes
