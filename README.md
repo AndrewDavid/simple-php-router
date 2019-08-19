@@ -41,6 +41,7 @@ You can donate any amount of your choice by [clicking here](https://www.paypal.c
 		- [Regular expression constraints](#regular-expression-constraints)
 		- [Regular expression route-match](#regular-expression-route-match)
 		- [Custom regex for matching parameters](#custom-regex-for-matching-parameters)
+		- [Setting Post Body Argument Type](#setting-post-body-argument-type)
 	- [Named routes](#named-routes)
 		- [Generating URLs To Named Routes](#generating-urls-to-named-routes)
 	- [Router groups](#router-groups)
@@ -548,6 +549,31 @@ SimpleRouter::group(['defaultParameterRegex' => '[\w\-]+'], function() {
 
 });
 ```
+
+### Setting post body argument type
+
+A request's post body can be passed to the route's method by using `setPostBodyType()`. This will convert the post body into a model/object of your choice and add it to the top of the parameter list. This means that the route's called method will recieve the post body as an object as its first argument.
+
+#### Example
+
+```php
+SimpleRouter::post('/filter/{param}', 'VideoController@filter')->setPostBodyType(Query::class);
+
+POST BODY:
+{
+	order: 'asc',
+	page: 1
+}
+
+class VideoController
+{
+	public function filter(Query $query, $param)
+	{
+		// $query->order == 'asc'
+		// $query->page == 1
+	}
+}```
+
 
 ## Named routes
 
