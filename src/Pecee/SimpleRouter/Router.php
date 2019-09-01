@@ -377,6 +377,7 @@ class Router
                     ]);
 
                     $route->loadMiddleware($this->request, $this);
+                    $route->addFilesToParameters($this->request);
                     $route->addPostBodyToParameters($this->request);
 
                     $output = $this->handleRouteRewrite($key, $url);

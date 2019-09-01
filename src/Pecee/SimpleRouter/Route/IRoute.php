@@ -187,9 +187,31 @@ interface IRoute
 	/**
 	 * Get the class type to convert the post body to before passing it as a method parameter.
 	 *
-	 * @return static
+	 * @return string
 	 */
 	public function getPostBodyType(): string;
+	
+	/**
+	 * Set whether or not to include the files as an array object passed as a method parameter.
+	 *
+	 * @return static
+	 */
+	public function includeFiles(): self;
+	
+	/**
+	 * Set the class type to convert the file data to before passing it as a method parameter.
+	 *
+	 * @param string $type
+	 * @return static
+	 */
+	public function setFileObjectType(string $type): self;
+	
+	/**
+	 * Get the class type to convert the file data to before passing it as a method parameter.
+	 *
+	 * @return string
+	 */
+	public function getFileObjectType(): string;
 
     /**
      * Export route settings to array so they can be merged with another route.

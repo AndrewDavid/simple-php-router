@@ -53,6 +53,23 @@ abstract class LoadableRoute extends Route implements ILoadableRoute
         $router->debug('Finished loading middlewares');
     }
     
+    public function addFilesToParameters(Request $request): ILoadableRoute
+    {
+	    if ($this->includeFiles === false)
+		    return $this;
+	    
+	    $files = $request->getInputHandler()->parseFiles();
+	    
+	    if (empty($this->fileObjectType) === false) {
+		    foreach($files as &$file) {
+			    $file = PostBody::convertArrayToType($file, $this->fileObjectType);
+		    }
+	    }
+	    
+	    $this->setParameters(array_merge($files, $this->parameters));
+	    return $this;
+    }
+    
 	public function addPostBodyToParameters(Request $request): ILoadableRoute
 	{
 		if(empty($this->postBodyType))

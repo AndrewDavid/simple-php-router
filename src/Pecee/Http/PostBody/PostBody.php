@@ -17,7 +17,7 @@
 			return self::castTypeProperties($convertedBody, $type);
 		}
 		
-		public static function castTypeProperties($postBodyObject, $type)
+		public static function castTypeProperties($postBodyObject, string $type)
 		{
 			$typeModel = new $type;
 			
@@ -30,18 +30,26 @@
 				if(property_exists($typeModel, $property) === false)
 					continue;
 				
-				if(is_object($typeModel->$property))
+				if(is_object($typeModel->{$property}))
 				{
 					if(is_array($value))
 					{
-						$value = self::convertArrayToType($value, gettype($typeModel->$property));
+						$value = self::convertArrayToType($value, gettype($typeModel->{$property}));
+					}
+					else if(is_string($value))
+					{
+						$jsonValue = json_decode($value, true);
+						if(json_last_error() == JSON_ERROR_NONE && is_array($jsonValue))
+						{
+							$value = self::convertArrayToType($jsonValue, gettype($typeModel->{$property}));
+						}
 					}
 					
-					$value = self::castTypeProperties($value, gettype($typeModel->$property));
+					$value = self::castTypeProperties($value, gettype($typeModel->{$property}));
 				}
 				else
 				{
-					settype($value, gettype($typeModel->$property));
+					settype($value, gettype($typeModel->{$property}));
 				}
 				
 				$typeModel->{$property} = $value;

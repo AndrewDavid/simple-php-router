@@ -50,7 +50,9 @@ abstract class Route implements IRoute
     protected $parent;
     protected $callback;
     protected $defaultNamespace;
+    protected $includeFiles = false;
     protected $postBodyType = '';
+    protected $fileObjectType = '';
 
     /* Default options */
     protected $namespace;
@@ -592,5 +594,25 @@ abstract class Route implements IRoute
 	public function getPostBodyType(): string
 	{
 		return $this->postBodyType;
+	}
+	
+	public function includeFiles(): IRoute
+	{
+		$this->includeFiles = true;
+		
+		return $this;
+	}
+	
+	public function setFileObjectType(string $type): IRoute
+	{
+		$this->includeFiles = true;
+		$this->fileObjectType = $type;
+		
+		return $this;
+	}
+	
+	public function getFileObjectType(): string
+	{
+		return $this->fileObjectType;
 	}
 }
