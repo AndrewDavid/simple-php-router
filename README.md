@@ -42,6 +42,7 @@ You can donate any amount of your choice by [clicking here](https://www.paypal.c
 		- [Regular expression route-match](#regular-expression-route-match)
 		- [Custom regex for matching parameters](#custom-regex-for-matching-parameters)
 		- [Setting Post Body Argument Type](#setting-post-body-argument-type)
+		- [Including files in method arguments](#including-files-in-method-arguments)
 	- [Named routes](#named-routes)
 		- [Generating URLs To Named Routes](#generating-urls-to-named-routes)
 	- [Router groups](#router-groups)
@@ -552,7 +553,7 @@ SimpleRouter::group(['defaultParameterRegex' => '[\w\-]+'], function() {
 
 ### Setting post body argument type
 
-A request's post body can be passed to the route's method by using `setPostBodyType()`. This will convert the post body into a model/object of your choice and add it to the top of the parameter list. This means that the route's called method will recieve the post body as an object as its first argument.
+A request's post body can be passed to the route's method by using `setPostBodyType()`. This will convert the post body into a model/object/class of your choice and add it to the top of the parameter list. This means that the route's called method will recieve the post body object as its first argument.
 
 #### Example
 
@@ -571,6 +572,32 @@ class VideoController
 	{
 		// $query->order == 'asc'
 		// $query->page == 1
+	}
+}
+```
+
+### Including files in method arguments
+
+The files you send through the request can be passed to the route's method as an argument. To enable this, simply call `includeFiles()` method on the route. This will add all the files as an array (even if it's only one file) to the top of the argument list. This means that the route's called method will recieve the files array as its first argument (or as its second argument if you're also passing a post body argument). If you would like the file to be converted to an object/model/class of your choice, you can call the `setFileObjectType()` on the route instead of `includeFiles()`. The method that the route calls will still recieve an array as its first (or second) argument, but the elements inside that array will now be objects of your choice. Just make sure that the properties of the object you are converting your files to match the ones from the list:
+
+* index
+* name
+* filename
+* size
+* type
+* errors
+* tmpName
+
+#### Example
+
+```php
+SimpleRouter::post('/filter/{param}', 'VideoController@filter')->setFileObjectType(Query::class);
+
+class VideoController
+{
+	public function filter(array $files, $param)
+	{
+		//$files[0]->name
 	}
 }
 ```
@@ -1306,7 +1333,7 @@ All object implements the `IInputItem` interface and will always contain these m
 
 `InputFile` has the same methods as above along with some other file-specific methods like:
 
-- `getFilename` - get the filename.
+- `getFilename()` - get the filename.
 - `getTmpName()` - get file temporary name.
 - `getSize()` - get file size.
 - `move($destination)` - move file to destination.
