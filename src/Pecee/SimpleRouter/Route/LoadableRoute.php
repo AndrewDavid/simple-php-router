@@ -66,8 +66,8 @@ abstract class LoadableRoute extends Route implements ILoadableRoute
 		    }
 	    }
 	
-	    $this->originalParameters = $this->parameters;
 	    $this->parameters = array_merge(['files'=>$files], $this->parameters);
+	    $this->originalParameters = $this->parameters;
 	    
 	    return $this;
     }
@@ -82,8 +82,8 @@ abstract class LoadableRoute extends Route implements ILoadableRoute
 		
 		$postBody = PostBody::convertArrayToType($request->getInputHandler()->all(), $this->postBodyType);
 		
+		$this->parameters = array($this->postBodyType => $postBody) + $this->parameters;
 		$this->originalParameters = $this->parameters;
-		$this->parameters = array_merge([$this->postBodyType=>$postBody], $this->parameters);
 		
 		return $this;
 	}
