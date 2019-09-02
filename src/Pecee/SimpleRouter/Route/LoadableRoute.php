@@ -62,7 +62,7 @@ abstract class LoadableRoute extends Route implements ILoadableRoute
 	    
 	    if (empty($this->fileObjectType) === false) {
 		    foreach($files as &$file) {
-			    $file = PostBody::convertArrayToType($file, $this->fileObjectType);
+			    $file = PostBody::castTypeProperties($file, $this->fileObjectType);
 		    }
 	    }
 	

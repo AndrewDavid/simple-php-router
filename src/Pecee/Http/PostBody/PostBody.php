@@ -30,26 +30,31 @@
 				if(property_exists($typeModel, $property) === false)
 					continue;
 				
+				$propertyType = gettype($typeModel->{$property});
+				if (is_object($typeModel->{$property})) {
+					$propertyType = get_class($typeModel->{$property});
+				}
+				
 				if(is_object($typeModel->{$property}))
 				{
 					if(is_array($value))
 					{
-						$value = self::convertArrayToType($value, gettype($typeModel->{$property}));
+						$value = self::convertArrayToType($value, $propertyType);
 					}
 					else if(is_string($value))
 					{
 						$jsonValue = json_decode($value, true);
 						if(json_last_error() == JSON_ERROR_NONE && is_array($jsonValue))
 						{
-							$value = self::convertArrayToType($jsonValue, gettype($typeModel->{$property}));
+							$value = self::convertArrayToType($jsonValue, $propertyType);
 						}
 					}
 					
-					$value = self::castTypeProperties($value, gettype($typeModel->{$property}));
+					$value = self::castTypeProperties($value, $propertyType);
 				}
 				else
 				{
-					settype($value, gettype($typeModel->{$property}));
+					settype($value, $propertyType);
 				}
 				
 				$typeModel->{$property} = $value;
