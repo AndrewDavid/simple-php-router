@@ -30,13 +30,13 @@
 				if(property_exists($typeModel, $property) === false)
 					continue;
 				
-				$propertyType = gettype($typeModel->{$property});
-				if (is_object($typeModel->{$property})) {
-					$propertyType = get_class($typeModel->{$property});
-				}
+				if(!isset($value) || is_null($value) || empty($value))
+					continue;
 				
 				if(is_object($typeModel->{$property}))
 				{
+					$propertyType = get_class($typeModel->{$property});
+					
 					if(is_array($value))
 					{
 						$value = self::convertArrayToType($value, $propertyType);
@@ -54,6 +54,7 @@
 				}
 				else
 				{
+					$propertyType = gettype($typeModel->{$property});
 					settype($value, $propertyType);
 				}
 				
