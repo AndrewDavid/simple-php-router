@@ -29,12 +29,20 @@ interface ILoadableRoute extends IRoute
     public function addFilesToParameters(Request $request): self;
 	
 	/**
-	 * Assigned the post body as a parameter of type $postBodyType
+	 * Assigned the post body as a parameter of type $postBodyModel
 	 *
 	 * @param Request $request
 	 * @return ILoadableRoute
 	 */
     public function addPostBodyToParameters(Request $request): self;
+	
+	/**
+	 * Assigned the get parameters as a model instead of individual parameters and replace the current set parameters
+	 *
+	 * @param Request $request
+	 * @return ILoadableRoute
+	 */
+	public function addGetParametersModelToParameters(Request $request): self;
 
     /**
      * Get url

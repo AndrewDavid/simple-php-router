@@ -177,19 +177,34 @@ interface IRoute
     public function setSettings(array $settings, bool $merge = false): self;
 	
 	/**
+	 * Set the class type to convert the get parameters to before passing it as a method parameter.
+	 *
+	 * @param string $type
+	 * @return static
+	 */
+	public function setGetParametersModel(string $type): self;
+	
+	/**
+	 * Get the class type to convert the get parameters to before passing it as a method parameter.
+	 *
+	 * @return string
+	 */
+	public function getGetParametersModel(): string;
+	
+	/**
 	 * Set the class type to convert the post body to before passing it as a method parameter.
 	 *
 	 * @param string $type
 	 * @return static
 	 */
-	public function setPostBodyType(string $type): self;
+	public function setPostBodyModel(string $type): self;
 	
 	/**
 	 * Get the class type to convert the post body to before passing it as a method parameter.
 	 *
 	 * @return string
 	 */
-	public function getPostBodyType(): string;
+	public function getPostBodyModel(): string;
 	
 	/**
 	 * Set whether or not to include the files as an array object passed as a method parameter.

@@ -551,14 +551,35 @@ SimpleRouter::group(['defaultParameterRegex' => '[\w\-]+'], function() {
 });
 ```
 
-### Setting post body argument type
+### Setting get parameters model
 
-A request's post body can be passed to the route's method by using `setPostBodyType()`. This will convert the post body into a model/object/class of your choice and add it to the top of the parameter list. This means that the route's called method will recieve the post body object as its first argument.
+A request's GET parameters can be compiled and passed to the route's method in the form of a model by using `setGetParametersModel()`. This will convert the GET parameters into a model/object/class of your choice and replace the parameter list by itself. This means that the route's called method will recieve the GET object as its first argument instead of individual arguments for each GET parameter.
 
 #### Example
 
 ```php
-SimpleRouter::post('/filter/{param}', 'VideoController@filter')->setPostBodyType(Query::class);
+URL: example.com/filter/1/2
+SimpleRouter::post('/filter/{param1}/{param2}', 'VideoController@filter')->setGetParametersModel(Query::class);
+
+class VideoController
+{
+	public function filter(Query $paramQuery)
+	{
+		// $paramQuery->param1 == 1
+		// $paramQuery->param2 == 2
+	}
+}
+```
+
+
+### Setting post body argument model
+
+A request's post body can be passed to the route's method by using `setPostBodyModel()`. This will convert the post body into a model/object/class of your choice and add it to the top of the parameter list. This means that the route's called method will recieve the post body object as its first argument.
+
+#### Example
+
+```php
+SimpleRouter::post('/filter/{param}', 'VideoController@filter')->setPostBodyModel(Query::class);
 
 POST BODY:
 {

@@ -284,6 +284,54 @@ class InputHandler
     {
         return $this->get[$index] ?? $defaultValue;
     }
+	
+	/**
+	 * Get all get items
+	 * @return array
+	 */
+	public function allGet(): array
+	{
+		return $_GET;
+	}
+	
+	/**
+	 * Get all post items
+	 * @return array
+	 */
+	public function allPost(): array
+	{
+		$output = [];
+		
+		if ($this->request->getMethod() === 'post') {
+			$output = $_POST;
+		}
+		
+		return $output;
+	}
+	
+	/**
+	 * Get all post body content
+	 * @param array $filter Only take items in filter
+	 * @return array
+	 */
+	public function allBody(array $filter = []): array
+	{
+		$output = [];
+		
+		if ($this->request->getMethod() === 'post') {
+			$contents = file_get_contents('php://input');
+			
+			// Append any PHP-input json
+			if (strpos(trim($contents), '{') === 0) {
+				$post = json_decode($contents, true);
+				if ($post !== false) {
+					$output += $post;
+				}
+			}
+		}
+		
+		return (\count($filter) > 0) ? array_intersect_key($output, array_flip($filter)) : $output;
+	}
 
     /**
      * Get all get/post items

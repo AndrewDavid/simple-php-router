@@ -51,7 +51,8 @@ abstract class Route implements IRoute
     protected $callback;
     protected $defaultNamespace;
     protected $includeFiles = false;
-    protected $postBodyType = '';
+    protected $getParametersModel = '';
+    protected $postBodyModel = '';
     protected $fileObjectType = '';
 
     /* Default options */
@@ -427,8 +428,12 @@ abstract class Route implements IRoute
             $this->setMiddlewares(array_merge((array)$values['middleware'], $this->middlewares));
         }
         
-	    if (isset($values['postbodytype']) === true) {
-		    $this->setPostBodyType($values['postbodytype']);
+        if (isset($values['getparametersmodel']) === true) {
+        	$this->setGetParametersModel($values['getparametersmodel']);
+        }
+        
+	    if (isset($values['postbodymodel']) === true) {
+		    $this->setPostBodyModel($values['postbodymodel']);
 	    }
 
         if (isset($values['defaultParameterRegex']) === true) {
@@ -583,17 +588,29 @@ abstract class Route implements IRoute
     {
         return $this->defaultParameterRegex;
     }
-	
-    public function setPostBodyType(string $type): IRoute
+    
+    public function setGetParametersModel(string $type): IRoute
     {
-    	$this->postBodyType = $type;
+	    $this->getParametersModel = $type;
+	
+	    return $this;
+    }
+	
+	public function getGetParametersModel(): string
+	{
+		return $this->getParametersModel;
+	}
+	
+    public function setPostBodyModel(string $type): IRoute
+    {
+    	$this->postBodyModel = $type;
     	
     	return $this;
     }
 	
-	public function getPostBodyType(): string
+	public function getPostBodyModel(): string
 	{
-		return $this->postBodyType;
+		return $this->postBodyModel;
 	}
 	
 	public function includeFiles(): IRoute

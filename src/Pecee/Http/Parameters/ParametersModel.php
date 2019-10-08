@@ -1,14 +1,14 @@
 <?php
-	namespace Pecee\Http\PostBody;
+	namespace Pecee\Http\Parameters;
 	
-	class PostBody
+	class ParametersModel
 	{
-		public static function convertArrayToType(array $postBody, string $type)
+		public static function convertArrayToType(array $parameters, string $type)
 		{
 			$convertedBody = new $type;
 			
-			// CONVERT POST BODY ARRAY TO OBJECT OF TYPE $type
-			foreach($postBody as $key => $value)
+			// CONVERT PARAMETERS ARRAY TO OBJECT OF TYPE $type
+			foreach($parameters as $key => $value)
 			{
 				if(property_exists($convertedBody, $key))
 					$convertedBody->{$key} = $value;
@@ -17,12 +17,12 @@
 			return self::castTypeProperties($convertedBody, $type);
 		}
 		
-		public static function castTypeProperties($postBodyObject, string $type)
+		public static function castTypeProperties($parametersObject, string $type)
 		{
 			$typeModel = new $type;
 			
-			// CAST POST BODY OBJECT PROPERTIES TO EXPECTED PROPERTY TYPES
-			foreach(get_object_vars($postBodyObject) as $property => $value)
+			// CAST PARAMETERS OBJECT PROPERTIES TO EXPECTED PROPERTY TYPES
+			foreach(get_object_vars($parametersObject) as $property => $value)
 			{
 				if(is_null($value))
 					continue;

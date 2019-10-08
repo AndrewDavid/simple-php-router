@@ -3,6 +3,7 @@
 namespace Pecee\SimpleRouter\Route;
 
 use Pecee\Http\Middleware\IMiddleware;
+use Pecee\Http\Parameters\ParametersModel;
 use Pecee\Http\PostBody\PostBody;
 use Pecee\Http\Request;
 use Pecee\SimpleRouter\Exceptions\HttpException;
@@ -52,6 +53,22 @@ abstract class LoadableRoute extends Route implements ILoadableRoute
 
         $router->debug('Finished loading middlewares');
     }
+	
+	public function addGetParametersModelToParameters(Request $request): ILoadableRoute
+	{
+		if(empty($this->getParametersModel))
+			return $this;
+		
+		if(sizeof($request->getInputHandler()->allGet()) == 0)
+			return $this;
+		
+		$getModel = ParametersModel::convertArrayToType($request->getInputHandler()->allGet(), $this->getParametersModel);
+		
+		$this->parameters = array($this->getParametersModel => $getModel);
+		$this->originalParameters = $this->parameters;
+		
+		return $this;
+	}
     
     public function addFilesToParameters(Request $request): ILoadableRoute
     {
@@ -62,7 +79,7 @@ abstract class LoadableRoute extends Route implements ILoadableRoute
 	    
 	    if (empty($this->fileObjectType) === false) {
 		    foreach($files as &$file) {
-			    $file = PostBody::castTypeProperties($file, $this->fileObjectType);
+			    $file = ParametersModel::castTypeProperties($file, $this->fileObjectType);
 		    }
 	    }
 	
@@ -74,15 +91,15 @@ abstract class LoadableRoute extends Route implements ILoadableRoute
     
 	public function addPostBodyToParameters(Request $request): ILoadableRoute
 	{
-		if(empty($this->postBodyType))
+		if(empty($this->postBodyModel))
 			return $this;
 		
-		if(sizeof($request->getInputHandler()->all()) == 0)
+		if(sizeof($request->getInputHandler()->allBody()) == 0)
 			return $this;
 		
-		$postBody = PostBody::convertArrayToType($request->getInputHandler()->all(), $this->postBodyType);
+		$postBody = ParametersModel::convertArrayToType($request->getInputHandler()->allBody(), $this->postBodyModel);
 		
-		$this->parameters = array($this->postBodyType => $postBody) + $this->parameters;
+		$this->parameters = array($this->postBodyModel => $postBody) + $this->parameters;
 		$this->originalParameters = $this->parameters;
 		
 		return $this;
