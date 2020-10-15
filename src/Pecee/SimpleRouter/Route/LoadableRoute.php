@@ -35,7 +35,6 @@ abstract class LoadableRoute extends Route implements ILoadableRoute
         $router->debug('Loading middlewares');
 
         foreach ($this->getMiddlewares() as $middleware) {
-
             if (\is_object($middleware) === false) {
                 $middleware = $router->getClassLoader()->loadClass($middleware);
             }
@@ -53,57 +52,59 @@ abstract class LoadableRoute extends Route implements ILoadableRoute
 
         $router->debug('Finished loading middlewares');
     }
-	
-	public function addGetParametersModelToParameters(Request $request): ILoadableRoute
-	{
-		if(empty($this->getParametersModel))
-			return $this;
-		
-		if(sizeof($request->getInputHandler()->allGet()) == 0)
-			return $this;
-		
-		$getModel = ParametersModel::convertArrayToType($request->getInputHandler()->allGet(), $this->getParametersModel);
-		
-		$this->parameters = array($this->getParametersModel => $getModel);
-		$this->originalParameters = $this->parameters;
-		
-		return $this;
-	}
+    
+    public function addGetParametersModelToParameters(Request $request): ILoadableRoute
+    {
+        if (empty($this->getParametersModel)) {
+            return $this;
+        }
+        
+        $getValues = (sizeof($request->getInputHandler()->allGet()) != 0) ? $getValues = $request->getInputHandler()->allGet() : [];
+        $getModel = ParametersModel::convertArrayToType($getValues, $this->getParametersModel);
+        
+        $this->parameters = array($this->getParametersModel => $getModel);
+        $this->originalParameters = $this->parameters;
+        
+        return $this;
+    }
     
     public function addFilesToParameters(Request $request): ILoadableRoute
     {
-	    if ($this->includeFiles === false)
-		    return $this;
-	    
-	    $files = $request->getInputHandler()->parseFiles();
-	    
-	    if (empty($this->fileObjectType) === false) {
-		    foreach($files as &$file) {
-			    $file = ParametersModel::castTypeProperties($file, $this->fileObjectType);
-		    }
-	    }
-	
-	    $this->parameters = array_merge(['files'=>$files], $this->parameters);
-	    $this->originalParameters = $this->parameters;
-	    
-	    return $this;
+        if ($this->includeFiles === false) {
+            return $this;
+        }
+        
+        $files = $request->getInputHandler()->parseFiles();
+        
+        if (empty($this->fileObjectType) === false) {
+            foreach ($files as &$file) {
+                $file = ParametersModel::castTypeProperties($file, $this->fileObjectType);
+            }
+        }
+    
+        $this->parameters = array_merge(['files'=>$files], $this->parameters);
+        $this->originalParameters = $this->parameters;
+        
+        return $this;
     }
     
-	public function addPostBodyToParameters(Request $request): ILoadableRoute
-	{
-		if(empty($this->postBodyModel))
-			return $this;
-		
-		if(sizeof($request->getInputHandler()->allBody()) == 0)
-			return $this;
-		
-		$postBody = ParametersModel::convertArrayToType($request->getInputHandler()->allBody(), $this->postBodyModel);
-		
-		$this->parameters = array($this->postBodyModel => $postBody) + $this->parameters;
-		$this->originalParameters = $this->parameters;
-		
-		return $this;
-	}
+    public function addPostBodyToParameters(Request $request): ILoadableRoute
+    {
+        if (empty($this->postBodyModel)) {
+            return $this;
+        }
+        
+        if (sizeof($request->getInputHandler()->allBody()) == 0) {
+            return $this;
+        }
+        
+        $postBody = ParametersModel::convertArrayToType($request->getInputHandler()->allBody(), $this->postBodyModel);
+        
+        $this->parameters = array($this->postBodyModel => $postBody) + $this->parameters;
+        $this->originalParameters = $this->parameters;
+        
+        return $this;
+    }
 
     public function matchRegex(Request $request, $url): ?bool
     {
@@ -127,7 +128,6 @@ abstract class LoadableRoute extends Route implements ILoadableRoute
         $this->url = ($url === '/') ? '/' : '/' . trim($url, '/') . '/';
 
         if (strpos($this->url, $this->paramModifiers[0]) !== false) {
-
             $regex = sprintf(static::PARAMETERS_REGEX_FORMAT, $this->paramModifiers[0], $this->paramOptionalSymbol, $this->paramModifiers[1]);
 
             if ((bool)preg_match_all('/' . $regex . '/u', $this->url, $matches) !== false) {
@@ -184,7 +184,6 @@ abstract class LoadableRoute extends Route implements ILoadableRoute
         $params = $this->getParameters();
 
         foreach (array_keys($params) as $param) {
-
             if ($parameters === '' || (\is_array($parameters) === true && \count($parameters) === 0)) {
                 $value = '';
             } else {
@@ -289,7 +288,6 @@ abstract class LoadableRoute extends Route implements ILoadableRoute
     public function setSettings(array $values, bool $merge = false): IRoute
     {
         if (isset($values['as']) === true) {
-
             $name = $values['as'];
 
             if ($this->name !== null && $merge !== false) {
@@ -305,5 +303,4 @@ abstract class LoadableRoute extends Route implements ILoadableRoute
 
         return parent::setSettings($values, $merge);
     }
-
 }
