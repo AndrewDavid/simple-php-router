@@ -66,7 +66,7 @@ class Router
      * @var BaseCsrfVerifier
      */
     protected $csrfVerifier;
-	
+    
     /**
      * Get exception handlers
      * @var array
@@ -150,20 +150,20 @@ class Router
      * @param IRoute $route
      * @return IRoute
      */
-	public function addRoute(IRoute $route): IRoute
-	{
-		$this->fireEvents(EventHandler::EVENT_ADD_ROUTE, [
-			'route' => $route,
-		]);
-		
-		if ($this->isProcessingRoute === true) {
-			$this->routeStack[] = $route;
-		} else {
-			$this->routes[] = $route;
-		}
-		
-		return $route;
-	}
+    public function addRoute(IRoute $route): IRoute
+    {
+        $this->fireEvents(EventHandler::EVENT_ADD_ROUTE, [
+            'route' => $route,
+        ]);
+        
+        if ($this->isProcessingRoute === true) {
+            $this->routeStack[] = $route;
+        } else {
+            $this->routes[] = $route;
+        }
+        
+        return $route;
+    }
 
     /**
      * Render and process any new routes added.
@@ -173,7 +173,6 @@ class Router
      */
     protected function renderAndProcess(IRoute $route): void
     {
-
         $this->isProcessingRoute = true;
         $route->renderRoute($this->request, $this);
         $this->isProcessingRoute = false;
@@ -214,7 +213,6 @@ class Router
 
         /* @var $route IRoute */
         foreach ($routes as $route) {
-
             $this->debug('Processing route "%s"', \get_class($route));
 
             if ($group !== null) {
@@ -224,7 +222,6 @@ class Router
 
             /* @var $route IGroupRoute */
             if ($route instanceof IGroupRoute) {
-
                 if ($route->matchRoute($url, $this->request) === true) {
 
                     /* Add exception handlers */
@@ -237,7 +234,6 @@ class Router
                     if ($route instanceof IPartialGroupRoute === true) {
                         $this->renderAndProcess($route);
                     }
-
                 }
 
                 if ($route instanceof IPartialGroupRoute === false) {
@@ -274,7 +270,6 @@ class Router
 
         /* @var $manager IRouterBootManager */
         foreach ($this->bootManagers as $manager) {
-
             $className = \get_class($manager);
             $this->debug('Rendering bootmanager "%s"', $className);
             $this->fireEvents(EventHandler::EVENT_RENDER_BOOTMANAGER, [
@@ -316,7 +311,6 @@ class Router
         $this->loadRoutes();
 
         if ($this->csrfVerifier !== null) {
-
             $this->fireEvents(EventHandler::EVENT_RENDER_CSRF, [
                 'csrfVerifier' => $this->csrfVerifier,
             ]);
@@ -354,12 +348,10 @@ class Router
 
             /* @var $route ILoadableRoute */
             foreach ($this->processedRoutes as $key => $route) {
-
                 $this->debug('Matching route "%s"', \get_class($route));
 
                 /* If the route matches */
                 if ($route->matchRoute($url, $this->request) === true) {
-
                     $this->fireEvents(EventHandler::EVENT_MATCH_ROUTE, [
                         'route' => $route,
                     ]);
@@ -377,7 +369,7 @@ class Router
                     ]);
 
                     $route->loadMiddleware($this->request, $this);
-	                $route->addGetParametersModelToParameters($this->request);
+                    $route->addGetParametersModelToParameters($this->request);
                     $route->addFilesToParameters($this->request);
                     $route->addPostBodyToParameters($this->request);
 
@@ -405,7 +397,6 @@ class Router
                     }
                 }
             }
-
         } catch (\Exception $e) {
             $this->handleException($e);
         }
@@ -416,7 +407,6 @@ class Router
         }
 
         if (\count($this->request->getLoadedRoutes()) === 0) {
-
             $rewriteUrl = $this->request->getRewriteUrl();
 
             if ($rewriteUrl !== null) {
@@ -457,7 +447,6 @@ class Router
         }
 
         if ($this->request->getRewriteUrl() !== $url) {
-
             unset($this->processedRoutes[$key]);
 
             $this->request->setHasPendingRewrite(false);
@@ -490,7 +479,6 @@ class Router
 
         /* @var $handler IExceptionHandler */
         foreach ($this->exceptionHandlers as $key => $handler) {
-
             if (\is_object($handler) === false) {
                 $handler = new $handler();
             }
@@ -513,7 +501,6 @@ class Router
                 $this->debug('Finished rendering exception-handler');
 
                 if (isset($this->loadedExceptionHandlers[$key]) === false && $this->request->hasPendingRewrite() === true) {
-
                     $this->loadedExceptionHandlers[$key] = $handler;
 
                     $this->debug('Exception handler contains rewrite, reloading routes');
@@ -529,9 +516,7 @@ class Router
 
                     return $this->routeRequest();
                 }
-
             } catch (\Exception $e) {
-
             }
 
             $this->debug('Finished processing');
@@ -699,7 +684,6 @@ class Router
                         ->setPath($route->findUrl($method, $parameters, $name))
                         ->setParams($getParams);
                 }
-
             }
         }
 
@@ -907,5 +891,4 @@ class Router
     {
         return $this->debugList;
     }
-
 }

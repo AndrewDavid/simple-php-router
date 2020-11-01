@@ -131,8 +131,7 @@ abstract class Route implements IRoute
     protected function parseParameters($route, $url, $parameterRegex = null)
     {
         $regex = (strpos($route, $this->paramModifiers[0]) === false) ? null :
-            sprintf
-            (
+            sprintf(
                 static::PARAMETERS_REGEX_FORMAT,
                 $this->paramModifiers[0],
                 $this->paramOptionalSymbol,
@@ -147,19 +146,16 @@ abstract class Route implements IRoute
         if ($regex === null || (bool)preg_match_all('/' . $regex . '/u', $route, $parameters) === false) {
             $urlRegex = preg_quote($route, '/');
         } else {
-
             foreach (preg_split('/((\-?\/?)\{[^}]+\})/', $route) as $key => $t) {
-
                 $regex = '';
 
                 if ($key < \count($parameters[1])) {
-
                     $name = $parameters[1][$key];
 
                     /* If custom regex is defined, use that */
                     if (isset($this->where[$name]) === true) {
                         $regex = $this->where[$name];
-                    } else if ($parameterRegex !== null) {
+                    } elseif ($parameterRegex !== null) {
                         $regex = $parameterRegex;
                     } else {
                         $regex = $this->defaultParameterRegex ?? static::PARAMETERS_DEFAULT_REGEX;
@@ -429,12 +425,12 @@ abstract class Route implements IRoute
         }
         
         if (isset($values['getparametersmodel']) === true) {
-        	$this->setGetParametersModel($values['getparametersmodel']);
+            $this->setGetParametersModel($values['getparametersmodel']);
         }
         
-	    if (isset($values['postbodymodel']) === true) {
-		    $this->setPostBodyModel($values['postbodymodel']);
-	    }
+        if (isset($values['postbodymodel']) === true) {
+            $this->setPostBodyModel($values['postbodymodel']);
+        }
 
         if (isset($values['defaultParameterRegex']) === true) {
             $this->setDefaultParameterRegex($values['defaultParameterRegex']);
@@ -591,45 +587,45 @@ abstract class Route implements IRoute
     
     public function setGetParametersModel(string $type): IRoute
     {
-	    $this->getParametersModel = $type;
-	
-	    return $this;
+        $this->getParametersModel = $type;
+    
+        return $this;
     }
-	
-	public function getGetParametersModel(): string
-	{
-		return $this->getParametersModel;
-	}
-	
+    
+    public function getGetParametersModel(): string
+    {
+        return $this->getParametersModel;
+    }
+    
     public function setPostBodyModel(string $type): IRoute
     {
-    	$this->postBodyModel = $type;
-    	
-    	return $this;
+        $this->postBodyModel = $type;
+        
+        return $this;
     }
-	
-	public function getPostBodyModel(): string
-	{
-		return $this->postBodyModel;
-	}
-	
-	public function includeFiles(): IRoute
-	{
-		$this->includeFiles = true;
-		
-		return $this;
-	}
-	
-	public function setFileObjectType(string $type): IRoute
-	{
-		$this->includeFiles = true;
-		$this->fileObjectType = $type;
-		
-		return $this;
-	}
-	
-	public function getFileObjectType(): string
-	{
-		return $this->fileObjectType;
-	}
+    
+    public function getPostBodyModel(): string
+    {
+        return $this->postBodyModel;
+    }
+    
+    public function includeFiles(): IRoute
+    {
+        $this->includeFiles = true;
+        
+        return $this;
+    }
+    
+    public function setFileObjectType(string $type): IRoute
+    {
+        $this->includeFiles = true;
+        $this->fileObjectType = $type;
+        
+        return $this;
+    }
+    
+    public function getFileObjectType(): string
+    {
+        return $this->fileObjectType;
+    }
 }

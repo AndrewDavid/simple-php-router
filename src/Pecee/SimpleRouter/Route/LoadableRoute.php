@@ -62,7 +62,7 @@ abstract class LoadableRoute extends Route implements ILoadableRoute
         $getValues = (sizeof($request->getInputHandler()->allGet()) != 0) ? $getValues = $request->getInputHandler()->allGet() : [];
         $getModel = ParametersModel::convertArrayToType($getValues, $this->getParametersModel);
         
-        $this->parameters = array($this->getParametersModel => $getModel);
+        $this->parameters = array_merge(array($this->getParametersModel => $getModel), $this->parameters);
         $this->originalParameters = $this->parameters;
         
         return $this;

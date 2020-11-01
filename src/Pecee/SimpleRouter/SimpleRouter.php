@@ -78,7 +78,6 @@ class SimpleRouter
             $routerOutput = ob_get_contents();
             ob_end_clean();
         } catch (\Exception $e) {
-
         }
 
         // Try to parse library version
@@ -461,7 +460,6 @@ class SimpleRouter
             try {
                 return new Url('/');
             } catch (MalformedUrlException $e) {
-
             }
         }
 
@@ -516,12 +514,10 @@ class SimpleRouter
     public static function addDefaultNamespace(IRoute $route): IRoute
     {
         if (static::$defaultNamespace !== null) {
-
             $callback = $route->getCallback();
 
             /* Only add default namespace on relative callbacks */
             if ($callback === null || (\is_string($callback) === true && $callback[0] !== '\\')) {
-
                 $namespace = static::$defaultNamespace;
 
                 $currentNamespace = $route->getNamespace();
@@ -531,7 +527,6 @@ class SimpleRouter
                 }
 
                 $route->setDefaultNamespace($namespace);
-
             }
         }
 
@@ -560,5 +555,4 @@ class SimpleRouter
     {
         return static::$defaultNamespace;
     }
-
 }
