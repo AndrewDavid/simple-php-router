@@ -11,296 +11,301 @@ use Pecee\SimpleRouter\Router;
 
 abstract class LoadableRoute extends Route implements ILoadableRoute
 {
-    /**
-     * @var string
-     */
-    protected $url;
+	/**
+	 * @var string
+	 */
+	protected $url;
 
-    /**
-     * @var string
-     */
-    protected $name;
+	/**
+	 * @var string
+	 */
+	protected $name;
 
-    protected $regex;
+	protected $regex;
 
-    /**
-     * Loads and renders middlewares-classes
-     *
-     * @param Request $request
-     * @param Router $router
-     * @throws HttpException
-     */
-    public function loadMiddleware(Request $request, Router $router): void
-    {
-        $router->debug('Loading middlewares');
+	/**
+	 * Loads and renders middlewares-classes
+	 *
+	 * @param Request $request
+	 * @param Router $router
+	 * @throws HttpException
+	 */
+	public function loadMiddleware(Request $request, Router $router): void
+	{
+		$router->debug("Loading middlewares");
 
-        foreach ($this->getMiddlewares() as $middleware) {
-            if (\is_object($middleware) === false) {
-                $middleware = $router->getClassLoader()->loadClass($middleware);
-            }
+		foreach ($this->getMiddlewares() as $middleware) {
+			if (\is_object($middleware) === false) {
+				$middleware = $router->getClassLoader()->loadClass($middleware);
+			}
 
-            if (($middleware instanceof IMiddleware) === false) {
-                throw new HttpException($middleware . ' must be inherit the IMiddleware interface');
-            }
+			if ($middleware instanceof IMiddleware === false) {
+				throw new HttpException($middleware . " must be inherit the IMiddleware interface");
+			}
 
-            $className = \get_class($middleware);
+			$className = \get_class($middleware);
 
-            $router->debug('Loading middleware "%s"', $className);
-            $middleware->handle($request);
-            $router->debug('Finished loading middleware "%s"', $className);
-        }
+			$router->debug('Loading middleware "%s"', $className);
+			$middleware->handle($request);
+			$router->debug('Finished loading middleware "%s"', $className);
+		}
 
-        $router->debug('Finished loading middlewares');
-    }
-    
-    public function addGetParametersModelToParameters(Request $request): ILoadableRoute
-    {
-        if (empty($this->getParametersModel)) {
-            return $this;
-        }
-        
-        $getValues = (sizeof($request->getInputHandler()->allGet()) != 0) ? $getValues = $request->getInputHandler()->allGet() : [];
-        $getModel = ParametersModel::convertArrayToType($getValues, $this->getParametersModel);
-        
-        $this->parameters = array_merge(array($this->getParametersModel => $getModel), $this->parameters);
-        $this->originalParameters = $this->parameters;
-        
-        return $this;
-    }
-    
-    public function addFilesToParameters(Request $request): ILoadableRoute
-    {
-        if ($this->includeFiles === false) {
-            return $this;
-        }
-        
-        $files = $request->getInputHandler()->parseFiles();
-        
-        if (empty($this->fileObjectType) === false) {
-            foreach ($files as &$file) {
-                $file = ParametersModel::castTypeProperties($file, $this->fileObjectType);
-            }
-        }
-    
-        $this->parameters = array_merge(['files'=>$files], $this->parameters);
-        $this->originalParameters = $this->parameters;
-        
-        return $this;
-    }
-    
-    public function addPostBodyToParameters(Request $request): ILoadableRoute
-    {
-        if (empty($this->postBodyModel)) {
-            return $this;
-        }
-        
-        if (sizeof($request->getInputHandler()->allBody()) == 0) {
-            return $this;
-        }
-        
-        $postBody = ParametersModel::castTypeProperties($request->getInputHandler()->allBody(), $this->postBodyModel);
-        
-        $this->parameters = array_merge(array($this->postBodyModel => $postBody), $this->parameters);
-        $this->originalParameters = $this->parameters;
-        
-        return $this;
-    }
+		$router->debug("Finished loading middlewares");
+	}
 
-    public function matchRegex(Request $request, $url): ?bool
-    {
-        /* Match on custom defined regular expression */
+	public function addGetParametersModelToParameters(Request $request): ILoadableRoute
+	{
+		if (empty($this->getParametersModel)) {
+			return $this;
+		}
 
-        if ($this->regex === null) {
-            return null;
-        }
+		$getValues = sizeof($request->getInputHandler()->allGet()) != 0 ? ($getValues = $request->getInputHandler()->allGet()) : [];
+		$getModel = ParametersModel::convertArrayToType($getValues, $this->getParametersModel);
 
-        return ((bool)preg_match($this->regex, $request->getHost() . $url) !== false);
-    }
+		$this->parameters = array_merge([$this->getParametersModel => $getModel], $this->parameters);
+		$this->originalParameters = $this->parameters;
 
-    /**
-     * Set url
-     *
-     * @param string $url
-     * @return static
-     */
-    public function setUrl(string $url): ILoadableRoute
-    {
-        $this->url = ($url === '/') ? '/' : '/' . trim($url, '/') . '/';
+		return $this;
+	}
 
-        if (strpos($this->url, $this->paramModifiers[0]) !== false) {
-            $regex = sprintf(static::PARAMETERS_REGEX_FORMAT, $this->paramModifiers[0], $this->paramOptionalSymbol, $this->paramModifiers[1]);
+	public function addFilesToParameters(Request $request): ILoadableRoute
+	{
+		if ($this->includeFiles === false) {
+			return $this;
+		}
 
-            if ((bool)preg_match_all('/' . $regex . '/u', $this->url, $matches) !== false) {
-                $this->parameters = array_fill_keys($matches[1], null);
-            }
-        }
+		$files = $request->getInputHandler()->parseFiles();
 
-        return $this;
-    }
+		if (empty($this->fileObjectType) === false) {
+			foreach ($files as &$file) {
+				$file = ParametersModel::castTypeProperties($file, $this->fileObjectType);
+			}
+		}
 
-    /**
-     * Prepend url
-     *
-     * @param string $url
-     * @return ILoadableRoute
-     */
-    public function prependUrl(string $url): ILoadableRoute
-    {
-        return $this->setUrl(rtrim($url, '/') . $this->url);
-    }
+		$this->parameters = array_merge(["files" => $files], $this->parameters);
+		$this->originalParameters = $this->parameters;
 
-    public function getUrl(): string
-    {
-        return $this->url;
-    }
+		return $this;
+	}
 
-    /**
-     * Find url that matches method, parameters or name.
-     * Used when calling the url() helper.
-     *
-     * @param string|null $method
-     * @param string|array|null $parameters
-     * @param string|null $name
-     * @return string
-     */
-    public function findUrl(?string $method = null, $parameters = null, ?string $name = null): string
-    {
-        $url = $this->getUrl();
+	public function addPostBodyToParameters(Request $request): ILoadableRoute
+	{
+		if (empty($this->postBodyModel)) {
+			return $this;
+		}
 
-        $group = $this->getGroup();
+		$params = $request->getInputHandler()->allBody();
+		if (sizeof($request->getInputHandler()->allBody()) == 0) {
+			$params = $request->getInputHandler()->allPost();
+			if (sizeof($request->getInputHandler()->allPost()) == 0) {
+				return $this;
+			}
+		}
 
-        if ($group !== null && \count($group->getDomains()) !== 0) {
-            $url = '//' . $group->getDomains()[0] . $url;
-        }
+		$combinedParameters = array_merge($params, $this->parameters["files"]);
+		$postBody = ParametersModel::castTypeProperties($combinedParameters, $this->postBodyModel);
 
-        /* Create the param string - {parameter} */
-        $param1 = $this->paramModifiers[0] . '%s' . $this->paramModifiers[1];
+		$this->parameters = array_merge([$this->postBodyModel => $postBody], $this->parameters);
+		$this->originalParameters = $this->parameters;
 
-        /* Create the param string with the optional symbol - {parameter?} */
-        $param2 = $this->paramModifiers[0] . '%s' . $this->paramOptionalSymbol . $this->paramModifiers[1];
+		return $this;
+	}
 
-        /* Replace any {parameter} in the url with the correct value */
+	public function matchRegex(Request $request, $url): ?bool
+	{
+		/* Match on custom defined regular expression */
 
-        $params = $this->getParameters();
+		if ($this->regex === null) {
+			return null;
+		}
 
-        foreach (array_keys($params) as $param) {
-            if ($parameters === '' || (\is_array($parameters) === true && \count($parameters) === 0)) {
-                $value = '';
-            } else {
-                $p = (array)$parameters;
-                $value = array_key_exists($param, $p) ? $p[$param] : $params[$param];
+		return (bool) preg_match($this->regex, $request->getHost() . $url) !== false;
+	}
 
-                /* If parameter is specifically set to null - use the original-defined value */
-                if ($value === null && isset($this->originalParameters[$param]) === true) {
-                    $value = $this->originalParameters[$param];
-                }
-            }
+	/**
+	 * Set url
+	 *
+	 * @param string $url
+	 * @return static
+	 */
+	public function setUrl(string $url): ILoadableRoute
+	{
+		$this->url = $url === "/" ? "/" : "/" . trim($url, "/") . "/";
 
-            if (stripos($url, $param1) !== false || stripos($url, $param) !== false) {
-                /* Add parameter to the correct position */
-                $url = str_ireplace([sprintf($param1, $param), sprintf($param2, $param)], $value, $url);
-            } else {
-                /* Parameter aren't recognized and will be appended at the end of the url */
-                $url .= $value . '/';
-            }
-        }
+		if (strpos($this->url, $this->paramModifiers[0]) !== false) {
+			$regex = sprintf(static::PARAMETERS_REGEX_FORMAT, $this->paramModifiers[0], $this->paramOptionalSymbol, $this->paramModifiers[1]);
 
-        return rtrim('/' . ltrim($url, '/'), '/') . '/';
-    }
+			if ((bool) preg_match_all("/" . $regex . "/u", $this->url, $matches) !== false) {
+				$this->parameters = array_fill_keys($matches[1], null);
+			}
+		}
 
-    /**
-     * Returns the provided name for the router.
-     *
-     * @return string
-     */
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
+		return $this;
+	}
 
-    /**
-     * Check if route has given name.
-     *
-     * @param string $name
-     * @return bool
-     */
-    public function hasName(string $name): bool
-    {
-        return strtolower($this->name) === strtolower($name);
-    }
+	/**
+	 * Prepend url
+	 *
+	 * @param string $url
+	 * @return ILoadableRoute
+	 */
+	public function prependUrl(string $url): ILoadableRoute
+	{
+		return $this->setUrl(rtrim($url, "/") . $this->url);
+	}
 
-    /**
-     * Add regular expression match for the entire route.
-     *
-     * @param string $regex
-     * @return static
-     */
-    public function setMatch($regex): ILoadableRoute
-    {
-        $this->regex = $regex;
+	public function getUrl(): string
+	{
+		return $this->url;
+	}
 
-        return $this;
-    }
+	/**
+	 * Find url that matches method, parameters or name.
+	 * Used when calling the url() helper.
+	 *
+	 * @param string|null $method
+	 * @param string|array|null $parameters
+	 * @param string|null $name
+	 * @return string
+	 */
+	public function findUrl(?string $method = null, $parameters = null, ?string $name = null): string
+	{
+		$url = $this->getUrl();
 
-    /**
-     * Get regular expression match used for matching route (if defined).
-     *
-     * @return string
-     */
-    public function getMatch(): string
-    {
-        return $this->regex;
-    }
+		$group = $this->getGroup();
 
-    /**
-     * Sets the router name, which makes it easier to obtain the url or router at a later point.
-     * Alias for LoadableRoute::setName().
-     *
-     * @see LoadableRoute::setName()
-     * @param string|array $name
-     * @return static
-     */
-    public function name($name): ILoadableRoute
-    {
-        return $this->setName($name);
-    }
+		if ($group !== null && \count($group->getDomains()) !== 0) {
+			$url = "//" . $group->getDomains()[0] . $url;
+		}
 
-    /**
-     * Sets the router name, which makes it easier to obtain the url or router at a later point.
-     *
-     * @param string $name
-     * @return static
-     */
-    public function setName(string $name): ILoadableRoute
-    {
-        $this->name = $name;
+		/* Create the param string - {parameter} */
+		$param1 = $this->paramModifiers[0] . "%s" . $this->paramModifiers[1];
 
-        return $this;
-    }
+		/* Create the param string with the optional symbol - {parameter?} */
+		$param2 = $this->paramModifiers[0] . "%s" . $this->paramOptionalSymbol . $this->paramModifiers[1];
 
-    /**
-     * Merge with information from another route.
-     *
-     * @param array $values
-     * @param bool $merge
-     * @return static
-     */
-    public function setSettings(array $values, bool $merge = false): IRoute
-    {
-        if (isset($values['as']) === true) {
-            $name = $values['as'];
+		/* Replace any {parameter} in the url with the correct value */
 
-            if ($this->name !== null && $merge !== false) {
-                $name .= '.' . $this->name;
-            }
+		$params = $this->getParameters();
 
-            $this->setName($name);
-        }
+		foreach (array_keys($params) as $param) {
+			if ($parameters === "" || (\is_array($parameters) === true && \count($parameters) === 0)) {
+				$value = "";
+			} else {
+				$p = (array) $parameters;
+				$value = array_key_exists($param, $p) ? $p[$param] : $params[$param];
 
-        if (isset($values['prefix']) === true) {
-            $this->prependUrl($values['prefix']);
-        }
+				/* If parameter is specifically set to null - use the original-defined value */
+				if ($value === null && isset($this->originalParameters[$param]) === true) {
+					$value = $this->originalParameters[$param];
+				}
+			}
 
-        return parent::setSettings($values, $merge);
-    }
+			if (stripos($url, $param1) !== false || stripos($url, $param) !== false) {
+				/* Add parameter to the correct position */
+				$url = str_ireplace([sprintf($param1, $param), sprintf($param2, $param)], $value, $url);
+			} else {
+				/* Parameter aren't recognized and will be appended at the end of the url */
+				$url .= $value . "/";
+			}
+		}
+
+		return rtrim("/" . ltrim($url, "/"), "/") . "/";
+	}
+
+	/**
+	 * Returns the provided name for the router.
+	 *
+	 * @return string
+	 */
+	public function getName(): ?string
+	{
+		return $this->name;
+	}
+
+	/**
+	 * Check if route has given name.
+	 *
+	 * @param string $name
+	 * @return bool
+	 */
+	public function hasName(string $name): bool
+	{
+		return strtolower($this->name) === strtolower($name);
+	}
+
+	/**
+	 * Add regular expression match for the entire route.
+	 *
+	 * @param string $regex
+	 * @return static
+	 */
+	public function setMatch($regex): ILoadableRoute
+	{
+		$this->regex = $regex;
+
+		return $this;
+	}
+
+	/**
+	 * Get regular expression match used for matching route (if defined).
+	 *
+	 * @return string
+	 */
+	public function getMatch(): string
+	{
+		return $this->regex;
+	}
+
+	/**
+	 * Sets the router name, which makes it easier to obtain the url or router at a later point.
+	 * Alias for LoadableRoute::setName().
+	 *
+	 * @see LoadableRoute::setName()
+	 * @param string|array $name
+	 * @return static
+	 */
+	public function name($name): ILoadableRoute
+	{
+		return $this->setName($name);
+	}
+
+	/**
+	 * Sets the router name, which makes it easier to obtain the url or router at a later point.
+	 *
+	 * @param string $name
+	 * @return static
+	 */
+	public function setName(string $name): ILoadableRoute
+	{
+		$this->name = $name;
+
+		return $this;
+	}
+
+	/**
+	 * Merge with information from another route.
+	 *
+	 * @param array $values
+	 * @param bool $merge
+	 * @return static
+	 */
+	public function setSettings(array $values, bool $merge = false): IRoute
+	{
+		if (isset($values["as"]) === true) {
+			$name = $values["as"];
+
+			if ($this->name !== null && $merge !== false) {
+				$name .= "." . $this->name;
+			}
+
+			$this->setName($name);
+		}
+
+		if (isset($values["prefix"]) === true) {
+			$this->prependUrl($values["prefix"]);
+		}
+
+		return parent::setSettings($values, $merge);
+	}
 }
